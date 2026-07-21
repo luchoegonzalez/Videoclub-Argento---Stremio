@@ -1,0 +1,19 @@
+{
+  "name": "peliculas-argentinas-stremio-addon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Addon de Stremio alimentado por la planilla pública de El Videoclub Argento.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "csv-parse": "7.0.1",
+    "express": "5.2.1"
+  }
+}
