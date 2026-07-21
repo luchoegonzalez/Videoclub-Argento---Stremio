@@ -41,7 +41,7 @@ function createApp({ addon = buildAddon() } = {}) {
   app.get('/meta/:type/:id.json', resourceHandler(addon.meta))
   app.get('/stream/:type/:id.json', resourceHandler(addon.stream))
   app.get('/', (_request, response) => {
-    response.type('html').send(`<!doctype html><html lang="es"><meta charset="utf-8"><title>El Videoclub Argento</title><body><h1>El Videoclub Argento</h1><p>Addon para Stremio listo.</p><p><a href="/manifest.json">Abrir manifest.json</a></p></body></html>`)
+    response.type('html').send(`<!doctype html><html lang="es"><meta charset="utf-8"><title>Videoclub Argento</title><body><h1>Videoclub Argento</h1><p>Addon para Stremio listo.</p><p><a href="/manifest.json">Abrir manifest.json</a></p></body></html>`)
   })
 
   return app
@@ -52,7 +52,7 @@ if (require.main === module) {
   const host = process.env.HOST || '0.0.0.0'
   createApp().listen(port, host, () => {
     const installUrl = `http://127.0.0.1:${port}/manifest.json`
-    console.log(`El Videoclub Argento está disponible en ${installUrl}`)
+    console.log(`Videoclub Argento está disponible en ${installUrl}`)
   })
 }
 

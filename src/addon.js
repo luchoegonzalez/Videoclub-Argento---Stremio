@@ -1,21 +1,26 @@
 const { SheetRepository, normalize } = require('./sheet')
 const { resolveMovieStreams } = require('./streams')
+const { createImdbMatcher } = require('./cinemeta')
 
 const CATALOG_ID = 'peliculas-argentinas-olvidadas'
 const PAGE_SIZE = 100
 
 const manifest = {
   id: 'community.videoclub-argento.peliculas-olvidadas',
-  version: '1.0.0',
-  name: 'El Videoclub Argento',
+  version: '1.1.0',
+  name: 'Videoclub Argento',
   description: 'Películas argentinas preservadas en la planilla pública de El Videoclub Argento.',
-  resources: ['catalog', 'meta', 'stream'],
+  resources: [
+    { name: 'catalog', types: ['movie'] },
+    { name: 'meta', types: ['movie'], idPrefixes: ['pao:'] },
+    { name: 'stream', types: ['movie'], idPrefixes: ['pao:', 'tt'] }
+  ],
   types: ['movie'],
-  idPrefixes: ['pao:'],
+  idPrefixes: ['pao:', 'tt'],
   catalogs: [{
     type: 'movie',
     id: CATALOG_ID,
-    name: 'Películas argentinas olvidadas',
+    name: 'Videoclub Argento',
     extra: [
       { name: 'search', isRequired: false },
       { name: 'skip', isRequired: false }
@@ -44,7 +49,11 @@ function previewFor(movie) {
   }
 }
 
-function buildAddon({ repository = new SheetRepository(), streamOptions = {} } = {}) {
+function buildAddon({
+  repository = new SheetRepository(),
+  streamOptions = {},
+  imdbMatcher = createImdbMatcher()
+} = {}) {
   async function catalog({ type, id, extra = {} }) {
     if (type !== 'movie' || id !== CATALOG_ID) return { metas: [] }
 
@@ -73,8 +82,13 @@ function buildAddon({ repository = new SheetRepository(), streamOptions = {} } =
   }
 
   async function stream({ type, id }) {
-    if (type !== 'movie' || !id.startsWith('pao:')) return { streams: [] }
-    const movie = (await repository.getMovies()).find((item) => item.id === id)
+    if (type !== 'movie' || (!id.startsWith('pao:') && !/^tt\d+$/.test(id))) {
+      return { streams: [] }
+    }
+    const movies = await repository.getMovies()
+    const movie = id.startsWith('pao:')
+      ? movies.find((item) => item.id === id)
+      : await imdbMatcher(id, movies)
     if (!movie) return { streams: [] }
     const streams = await resolveMovieStreams(movie, streamOptions)
     if (movie.officialUrl) {

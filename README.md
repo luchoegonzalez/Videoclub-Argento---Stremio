@@ -1,4 +1,4 @@
-# El Videoclub Argento para Stremio
+# Videoclub Argento para Stremio
 
 Addon comunitario que convierte la planilla pública de **El Videoclub Argento** en un catálogo de Stremio. La lista se vuelve a consultar cada 10 minutos, por lo que las altas y correcciones aparecen sin modificar el addon.
 
@@ -17,7 +17,7 @@ Después, abrí esta dirección en Stremio:
 http://127.0.0.1:7000/manifest.json
 ```
 
-El addon ofrece catálogo paginado, búsqueda por título/director/año, ficha básica y streams. Convierte los enlaces públicos de Google Drive en descargas directas y resuelve los videos de OK.ru a HLS en el momento de reproducirlos. También muestra la opción de “Medio oficial” cuando existe en la planilla. YouTube y archivos directos son compatibles; otros proveedores se abren en el navegador.
+El addon ofrece catálogo paginado, búsqueda por título/director/año, ficha básica y streams. También reconoce las fichas normales de Cinemeta mediante sus IDs de IMDb: busca la película correspondiente por título original o por director y año, y agrega allí los enlaces de la planilla. Convierte los enlaces públicos de Google Drive en descargas directas y resuelve los videos de OK.ru a HLS en el momento de reproducirlos. También muestra la opción de “Medio oficial” cuando existe en la planilla. YouTube y archivos directos son compatibles; otros proveedores se abren en el navegador.
 
 ## Configuración opcional
 
