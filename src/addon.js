@@ -1,22 +1,25 @@
 const { SheetRepository, normalize } = require('./sheet')
 const { resolveMovieStreams } = require('./streams')
-const { createImdbMatcher } = require('./cinemeta')
+const {
+  createCinemetaCatalogResolver,
+  createImdbMatcher,
+  mapWithConcurrency
+} = require('./cinemeta')
 
 const CATALOG_ID = 'peliculas-argentinas-olvidadas'
-const PAGE_SIZE = 100
+const PAGE_SIZE = 30
 
 const manifest = {
   id: 'community.videoclub-argento.peliculas-olvidadas',
-  version: '1.1.0',
+  version: '1.2.0',
   name: 'Videoclub Argento',
   description: 'Películas argentinas preservadas en la planilla pública de El Videoclub Argento.',
   resources: [
     { name: 'catalog', types: ['movie'] },
-    { name: 'meta', types: ['movie'], idPrefixes: ['pao:'] },
-    { name: 'stream', types: ['movie'], idPrefixes: ['pao:', 'tt'] }
+    { name: 'stream', types: ['movie'], idPrefixes: ['tt'] }
   ],
   types: ['movie'],
-  idPrefixes: ['pao:', 'tt'],
+  idPrefixes: ['tt'],
   catalogs: [{
     type: 'movie',
     id: CATALOG_ID,
@@ -52,7 +55,8 @@ function previewFor(movie) {
 function buildAddon({
   repository = new SheetRepository(),
   streamOptions = {},
-  imdbMatcher = createImdbMatcher()
+  imdbMatcher = createImdbMatcher(),
+  catalogResolver = createCinemetaCatalogResolver()
 } = {}) {
   async function catalog({ type, id, extra = {} }) {
     if (type !== 'movie' || id !== CATALOG_ID) return { metas: [] }
@@ -64,7 +68,9 @@ function buildAddon({
       : movies
     const skip = Math.max(0, Number.parseInt(extra.skip, 10) || 0)
 
-    return { metas: filtered.slice(skip, skip + PAGE_SIZE).map(previewFor) }
+    const page = filtered.slice(skip, skip + PAGE_SIZE)
+    const resolved = await mapWithConcurrency(page, catalogResolver)
+    return { metas: resolved.filter(Boolean) }
   }
 
   async function meta({ type, id }) {

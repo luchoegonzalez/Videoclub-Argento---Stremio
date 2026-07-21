@@ -97,11 +97,85 @@ function createImdbMatcher({ fetchImpl = fetch, ttlMs = 24 * 60 * 60 * 1000, now
   }
 }
 
+function previewFromCinemeta(meta) {
+  return {
+    id: meta.id,
+    type: 'movie',
+    name: meta.name,
+    poster: meta.poster,
+    background: meta.background,
+    logo: meta.logo,
+    releaseInfo: meta.releaseInfo || meta.year,
+    description: meta.description,
+    genres: meta.genres || meta.genre
+  }
+}
+
+function chooseSearchResult(movie, metas) {
+  const wantedYear = yearOf(movie.year)
+  const wantedTitle = normalizeTitle(movie.title)
+  const candidates = metas.filter((meta) => /^tt\d+$/.test(meta.id || ''))
+  const exactTitle = candidates.filter((meta) => normalizeTitle(meta.name) === wantedTitle)
+  const exactTitleAndYear = exactTitle.find((meta) => !wantedYear || yearOf(meta.releaseInfo || meta.year) === wantedYear)
+  if (exactTitleAndYear) return exactTitleAndYear
+
+  const sameYear = candidates.filter((meta) => yearOf(meta.releaseInfo || meta.year) === wantedYear)
+  if (sameYear.length) return sameYear[0]
+  if (exactTitle.length === 1) return exactTitle[0]
+  return null
+}
+
+function createCinemetaCatalogResolver({
+  fetchImpl = fetch,
+  ttlMs = 7 * 24 * 60 * 60 * 1000,
+  now = Date.now
+} = {}) {
+  const cache = new Map()
+
+  return async function resolveCatalogMovie(movie) {
+    const cached = cache.get(movie.id)
+    if (cached && now() - cached.loadedAt < ttlMs) return cached.preview
+
+    try {
+      const query = encodeURIComponent(movie.title)
+      const payload = await fetchJson(
+        `${CINEMETA_BASE_URL}/catalog/movie/top/search=${query}.json`,
+        fetchImpl
+      )
+      const result = chooseSearchResult(movie, payload.metas || [])
+      const preview = result ? previewFromCinemeta(result) : null
+      cache.set(movie.id, { preview, loadedAt: now() })
+      return preview
+    } catch {
+      return null
+    }
+  }
+}
+
+async function mapWithConcurrency(items, mapper, concurrency = 6) {
+  const results = new Array(items.length)
+  let nextIndex = 0
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex++
+      results[index] = await mapper(items[index], index)
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker))
+  return results
+}
+
 module.exports = {
+  chooseSearchResult,
+  createCinemetaCatalogResolver,
   createImdbMatcher,
   decodeHtml,
   extractTmdbOriginalTitle,
   findMatchingMovie,
+  mapWithConcurrency,
   normalizeTitle,
+  previewFromCinemeta,
   yearOf
 }
