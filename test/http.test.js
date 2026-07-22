@@ -15,16 +15,7 @@ test('expone el protocolo HTTP que consume Stremio', async (context) => {
   const repository = { getMovies: async () => movies }
   const { buildAddon } = require('../src/addon')
   const imdbMatcher = async (id) => id === 'tt1234567' ? movies[0] : null
-  const catalogResolver = async (movie) => ({
-    id: 'tt1234567',
-    type: 'movie',
-    name: movie.title,
-    poster: 'https://example.com/poster.jpg',
-    releaseInfo: movie.year
-  })
-  const server = createApp({
-    addon: buildAddon({ repository, imdbMatcher, catalogResolver })
-  }).listen(0, '127.0.0.1')
+  const server = createApp({ addon: buildAddon({ repository, imdbMatcher }) }).listen(0, '127.0.0.1')
   context.after(() => server.close())
   await once(server, 'listening')
   const baseUrl = `http://127.0.0.1:${server.address().port}`
@@ -35,7 +26,6 @@ test('expone el protocolo HTTP que consume Stremio', async (context) => {
 
   const catalog = await fetch(`${baseUrl}/catalog/movie/peliculas-argentinas-olvidadas/search=prueba.json`).then((response) => response.json())
   assert.equal(catalog.metas[0].name, 'Película de prueba')
-  assert.equal(catalog.metas[0].id, 'tt1234567')
 
   const stream = await fetch(`${baseUrl}/stream/movie/pao:1.json`).then((response) => response.json())
   assert.equal(stream.streams[0].url, 'https://example.com/pelicula.mp4')

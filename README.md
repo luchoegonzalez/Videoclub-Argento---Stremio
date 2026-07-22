@@ -17,7 +17,7 @@ Después, abrí esta dirección en Stremio:
 http://127.0.0.1:7000/manifest.json
 ```
 
-El addon ofrece un catálogo paginado y búsqueda por título/director/año. Las películas del catálogo reutilizan los IDs, pósters y fichas normales de Cinemeta; no se generan fichas duplicadas. El addon reconoce esas fichas mediante sus IDs de IMDb y agrega allí los enlaces de la planilla. Convierte los enlaces públicos de Google Drive en descargas directas y resuelve los videos de OK.ru a HLS en el momento de reproducirlos. También muestra la opción de “Medio oficial” cuando existe en la planilla. YouTube y archivos directos son compatibles; otros proveedores se abren en el navegador.
+El addon ofrece catálogo paginado, búsqueda por título/director/año, ficha básica y streams. También reconoce las fichas normales de Cinemeta mediante sus IDs de IMDb: busca la película correspondiente por título original o por director y año, y agrega allí los enlaces de la planilla. Convierte los enlaces públicos de Google Drive en descargas directas y resuelve los videos de OK.ru a HLS en el momento de reproducirlos. También muestra la opción de “Medio oficial” cuando existe en la planilla. YouTube y archivos directos son compatibles; otros proveedores se abren en el navegador.
 
 ## Configuración opcional
 
