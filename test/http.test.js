@@ -29,9 +29,23 @@ test('expone el protocolo HTTP que consume Stremio', async (context) => {
   await once(server, 'listening')
   const baseUrl = `http://127.0.0.1:${server.address().port}`
 
+  const healthResponse = await fetch(`${baseUrl}/health`)
+  assert.deepEqual(await healthResponse.json(), { ok: true })
+
   const manifestResponse = await fetch(`${baseUrl}/manifest.json`)
   assert.equal(manifestResponse.headers.get('access-control-allow-origin'), '*')
-  assert.equal((await manifestResponse.json()).name, 'Videoclub Argento')
+  const manifest = await manifestResponse.json()
+  assert.equal(manifest.name, 'Videoclub Argento')
+  assert.equal(manifest.logo, `${baseUrl}/icon.webp`)
+  assert.deepEqual(manifest.stremioAddonsConfig, {
+    issuer: 'https://stremio-addons.net',
+    signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..HkG26L0dxapKIs6eWu1qdw.JZzQ86BEfXpjIw0vdm9JK4ArK-jDbrkOMS1zeAd2S6DuOB8gUyWvZj_99uufWGN0ryAqf7APbOD2h4fYdm5GrSeEIxkpMjCLdsKpl8QgLQzS-y2qbLJ72iJyafmwzqzA.xDEt-unm4_hVPpvmF6u28g'
+  })
+
+  const iconResponse = await fetch(manifest.logo)
+  assert.equal(iconResponse.status, 200)
+  assert.equal(iconResponse.headers.get('content-type'), 'image/webp')
+  assert.ok((await iconResponse.arrayBuffer()).byteLength > 0)
 
   const catalog = await fetch(`${baseUrl}/catalog/movie/peliculas-argentinas-olvidadas/search=prueba.json`).then((response) => response.json())
   assert.equal(catalog.metas[0].name, 'Película de prueba')

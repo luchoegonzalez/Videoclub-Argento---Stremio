@@ -11,9 +11,10 @@ const PAGE_SIZE = 30
 
 const manifest = {
   id: 'community.videoclub-argento.peliculas-olvidadas',
-  version: '1.2.0',
+  version: '1.2.2',
   name: 'Videoclub Argento',
   description: 'Películas argentinas preservadas en la planilla pública de El Videoclub Argento.',
+  logo: 'icon.webp',
   resources: [
     { name: 'catalog', types: ['movie'] },
     { name: 'stream', types: ['movie'], idPrefixes: ['tt'] }
@@ -29,6 +30,10 @@ const manifest = {
       { name: 'skip', isRequired: false }
     ]
   }],
+  stremioAddonsConfig: {
+    issuer: 'https://stremio-addons.net',
+    signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..HkG26L0dxapKIs6eWu1qdw.JZzQ86BEfXpjIw0vdm9JK4ArK-jDbrkOMS1zeAd2S6DuOB8gUyWvZj_99uufWGN0ryAqf7APbOD2h4fYdm5GrSeEIxkpMjCLdsKpl8QgLQzS-y2qbLJ72iJyafmwzqzA.xDEt-unm4_hVPpvmF6u28g'
+  },
   behaviorHints: { configurable: false }
 }
 

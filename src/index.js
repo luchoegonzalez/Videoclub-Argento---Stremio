@@ -1,8 +1,19 @@
 const express = require('express')
+const path = require('node:path')
 const { buildAddon } = require('./addon')
+
+const ICON_PATH = path.join(__dirname, '..', 'assets', 'videoclub-argento.webp')
 
 function decodeExtra(value = '') {
   return Object.fromEntries(new URLSearchParams(value))
+}
+
+function publicUrl(request, pathname) {
+  const forwardedProtocol = request.get('x-forwarded-proto')
+  const forwardedHost = request.get('x-forwarded-host')
+  const protocol = forwardedProtocol ? forwardedProtocol.split(',')[0].trim() : request.protocol
+  const host = forwardedHost ? forwardedHost.split(',')[0].trim() : request.get('host')
+  return `${protocol}://${host}${pathname}`
 }
 
 function createApp({ addon = buildAddon() } = {}) {
@@ -17,7 +28,11 @@ function createApp({ addon = buildAddon() } = {}) {
     next()
   })
   app.get('/health', (_request, response) => response.json({ ok: true }))
-  app.get('/manifest.json', (_request, response) => response.json(addon.manifest))
+  app.get('/manifest.json', (request, response) => response.json({
+    ...addon.manifest,
+    logo: publicUrl(request, '/icon.webp')
+  }))
+  app.get('/icon.webp', (_request, response) => response.sendFile(ICON_PATH))
 
   function resourceHandler(handler, hasExtra = false) {
     return async (request, response) => {
@@ -56,4 +71,4 @@ if (require.main === module) {
   })
 }
 
-module.exports = { createApp, decodeExtra }
+module.exports = { createApp, decodeExtra, publicUrl }
